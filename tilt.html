@@ -139,11 +139,8 @@ Player.prototype.takeHit = function (dmg) {
 };
 //end of player class
 
-//random function dwai
-var randTo = function( i )
-{
-    return Math.floor(Math.random() * i)
-}
+//return random integer in [0, 1, 2 .. i-1]
+var randTo = (i) => Math.floor(Math.random() * i);
 
 //enemy class
 var Enemy = function (x, y, radius, color, speed, ai) {
@@ -299,12 +296,26 @@ PowerUp.prototype.update = function () {
             }
         }
     } else if (this.awake  && !this.active) { //second u hit
-            this.active = true;
-            let that = this;
-            setTimeout(function () {
-                console.log("time is up!");
-                deadPowerups.push(that);
-            }, 1000, this);
+        this.active = true;
+        let that = this;
+        setTimeout(function () {
+            console.log("powerup expired: " + that.type);
+            if (that.type == 3) {
+                console.log("spawn 4 powerups");
+                let delta = that.radius * 5;
+                const offsets = [
+                    [that.x + delta, that.y],
+                    [that.x - delta, that.y],
+                    [that.x, that.y + delta],
+                    [that.x, that.y - delta]
+                ]
+
+                offsets.map((vec) => {
+                    powerups[powerups.length] = new PowerUp(vec[0], vec[1], randTo(5));
+                })
+            }
+            deadPowerups.push(that);
+        }, 1000, this);
     } else if (this.awake  && this.active) {
         switch(this.type) {
             case 0:
