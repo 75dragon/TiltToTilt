@@ -33,11 +33,8 @@ canvas.addEventListener("mousemove", function (e) {
 });
 
 
-
-
-
 //player class
-var Ball = function (x, y, radius, color, hp) {
+var Player = function (x, y, radius, color, hp) {
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 10;
@@ -50,7 +47,7 @@ var Ball = function (x, y, radius, color, hp) {
     this.immune = false;
 }
 
-Ball.prototype.update = function (x, y) {
+Player.prototype.update = function (x, y) {
     // get the target x and y
     this.targetX = x;
     this.targetY = y;
@@ -77,7 +74,7 @@ Ball.prototype.update = function (x, y) {
     }
 };
 
-Ball.prototype.render = function () {
+Player.prototype.render = function () {
     ctx.fillStyle = this.color;
     // draw our triangle with x and y being the center, and points twards mouse! MATH! (I spent 30 minutes on this qq)
     var dx = this.targetX - this.x
@@ -99,27 +96,14 @@ Ball.prototype.render = function () {
     ctx.fill();
 };
 
-Ball.prototype.getX = function () {
-    return this.x;
-};
+//TODO: why does changing these to anonymous functions stop collisions from working?
+Player.prototype.getX = function () { return this.x };
+Player.prototype.getY = function () { return this.y };
+Player.prototype.getMouseX = function () { return this.targetX };
+Player.prototype.getMouseY = function () { return this.targetY };
+Player.prototype.getRadius = function () { return this.radius };
 
-Ball.prototype.getY = function () {
-    return this.y;
-};
-
-Ball.prototype.getMouseX = function () {
-    return this.targetX;
-};
-
-Ball.prototype.getMouseY = function () {
-    return this.targetY;
-};
-
-Ball.prototype.getRadius = function () {
-    return this.radius;
-}
-
-Ball.prototype.immune = function (time) {
+Player.prototype.immune = function (time) {
     this.immune = true;
     var theplayer = this;
     var hurt = setTimeout(function () {
@@ -127,7 +111,7 @@ Ball.prototype.immune = function (time) {
     }, time * 1000);
 }
 
-Ball.prototype.takeHit = function (dmg) {
+Player.prototype.takeHit = function (dmg) {
     if (!this.immune)
     {
         this.hp -= dmg;
@@ -263,7 +247,6 @@ Enemy.prototype.getRadius = function () {
 //end of enemy class
 
 
-
 //TODO bosses spawn per 25 enemies killed
 var boss1 = function(level) {
     this.health = 150 * level;
@@ -279,10 +262,8 @@ var boss1 = function(level) {
 }
 
 
-
-
 //start of powerup class
-var powerUp = function(x, y, type) {
+var PowerUp = function(x, y, type) {
     this.x = x;
     this.y = y;
     this.type = type;
@@ -292,7 +273,7 @@ var powerUp = function(x, y, type) {
     this.active = false;
 }
 
-powerUp.prototype.update = function () {
+PowerUp.prototype.update = function () {
     if (!this.awake && !this.active) {//didn't hit but spawned
         for (var i = 0; i < players.length; i++)
         {
@@ -300,7 +281,7 @@ powerUp.prototype.update = function () {
             (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
             {
                 this.awake = true;
-                console.log("powerup hit at: " + this.x + ", " + this.y);
+                console.log("power-up hit at: " + this.x + ", " + this.y);
             }
         }
     } else if (this.awake  && !this.active) { //second u hit
@@ -373,12 +354,9 @@ powerUp.prototype.update = function () {
     }//if awake an active
 };
 
-
-
-//TODO FIX THIS INDENTATION PLS THE FIRST LINE IS 6 SPACES AND THE SECOND IS 4 SPACES
-powerUp.prototype.render = function () {
-      if ( !this.active ) //draw a small black diamond at x and y to indicate a power up.
-      {
+PowerUp.prototype.render = function () {
+    if ( !this.active ) //draw a small black diamond at x and y to indicate a power up.
+    {
           ctx.fillStyle = this.color;
           ctx.beginPath();
           ctx.moveTo(this.x + this.radius, this.y);
@@ -392,17 +370,17 @@ powerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-      } else if ( this.type == 0 ) { // draw our circle with x and y being the center, radius ratio of 5.
+    } else if ( this.type == 0 ) { // draw our circle with x and y being the center, radius ratio of 5.
           ctx.fillStyle = this.color;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
           ctx.closePath();
           ctx.fill();
-      } else if ( this.type == 1 ) { //draw a + with height / width radius * 40 NERF!
+    } else if ( this.type == 1 ) { //draw a + with height / width radius * 40 NERF!
           ctx.fillStyle = this.color;
           ctx.fillRect(this.x - this.radius, this.y - this.radius * 20, this.radius * 2, this.radius * 40);
           ctx.fillRect(this.x - this.radius * 20, this.y - this.radius, this.radius * 40, 2 * this.radius);
-      } else if ( this.type == 2 ) { //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
+    } else if ( this.type == 2 ) { //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
           ctx.fillStyle = this.color;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius * 8, 0, Math.PI * 2);
@@ -415,7 +393,7 @@ powerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-      } else if ( this.type == 3 ) { //draw the + but an x
+    } else if ( this.type == 3 ) { //draw the + but an x
           ctx.fillStyle = this.color;
           ctx.beginPath()
           ctx.moveTo(this.x - this.radius * 5, this.y);
@@ -429,31 +407,20 @@ powerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-      } else if ( this.type == 4 ) { // draw our circle with x and y being the center, radius ratio of 5.
+    } else if ( this.type == 4 ) { // draw our circle with x and y being the center, radius ratio of 5.
           ctx.fillStyle = this.color;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
           ctx.closePath();
           ctx.fill();
           this.radius += .2;
-      }
+    }
 };
 
-powerUp.prototype.getX = function () {
-  return this.x;
-}
-
-powerUp.prototype.getY = function () {
-  return this.y;
-}
-
-powerUp.prototype.getX = function () {
-  return this.x;
-}
-
-powerUp.prototype.getRadius = function () {
-  return this.radius;
-}
+PowerUp.prototype.getY = function () { return this.y; }
+PowerUp.prototype.getX = function () { return this.x; }
+PowerUp.prototype.getX = function () { return this.x; }
+PowerUp.prototype.getRadius = function () { return this.radius; }
 
 function removeEnemy(dead) {
     enemys.splice(enemys.indexOf(dead), 1);
@@ -478,7 +445,7 @@ function removePowerup(dead) {
 }
 
 function world() {
-    var player1 = new Ball(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
+    var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
     players[0] = player1;
 
     enemySpawner = setInterval( function()
@@ -488,7 +455,7 @@ function world() {
 
     powerupSpawner = setInterval( function()
     {
-        powerups[powerups.length] = new powerUp(randTo(window.width) + 1, randTo(window.height) + 1, randTo(5));
+        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randTo(5));
         console.log("new powerup");
     }, 2000);
 
@@ -519,10 +486,9 @@ function render() {
     ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
 
     while (deadPlayers.length > 0)
-
     {
         removePlayer(deadPlayers.pop());
-        console.log("player down!")
+        console.log("player down!");
     }
 
     while (deadEnemies.length > 0)
@@ -534,7 +500,7 @@ function render() {
     while (deadPowerups.length > 0)
     {
         removePowerup(deadPowerups.pop());
-        console.log("powerup down!")
+        console.log("powerup down!");
     }
 
     if (gameOn)
@@ -543,12 +509,10 @@ function render() {
     }
 }
 
-function main()
+(function main()
 {
     world();
     render();
-}
-
-main();
+})()
 </script>
 </html>
