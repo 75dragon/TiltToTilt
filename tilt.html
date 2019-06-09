@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html>
 <body>
-<canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 </body>
+<style>
+    canvas {
+        margin: auto;
+    }
+    body {
+        overflow: hidden;
+    }
+</style>
 <script>
 'use strict';
 var canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d"),
     width = window.innerWidth,
     height = window.innerHeight,
-    mX = width/2,
-    mY = height/2;
+    mouseX = width/2,
+    mouseY = height/2;
 
 canvas.width = width;
 canvas.height = height; 
@@ -43,8 +51,8 @@ function randomPowerUp() {
 }
 
 canvas.addEventListener("mousemove", function (e) {
-    mX = e.pageX;
-    mY = e.pageY;
+   mouseX = e.pageX;
+   mouseY = e.pageY;
 });
 
 
@@ -113,8 +121,6 @@ Player.prototype.render = function () {
 //TODO: why does changing these to anonymous functions stop collisions from working?
 Player.prototype.getX = function () { return this.x };
 Player.prototype.getY = function () { return this.y };
-Player.prototype.getMouseX = function () { return this.targetX };
-Player.prototype.getMouseY = function () { return this.targetY };
 Player.prototype.getRadius = function () { return this.radius };
 
 Player.prototype.immune = function (time) {
@@ -170,8 +176,8 @@ Enemy.prototype.AI = function ( i ) {
         case 6:
             if (this.hitDestination)
             {
-                this.targetX = randTo(window.width) + 1;
-                this.targetY = randTo(window.height) + 1;
+                this.targetX = randTo(canvas.width) + 1;
+                this.targetY = randTo(canvas.height) + 1;
                 this.hitDestination = false;
             }
             break;
@@ -181,8 +187,8 @@ Enemy.prototype.AI = function ( i ) {
             break;
 
         case 8: //move to where the player's mouse is
-            this.targetX = players[0].getMouseX();
-            this.targetY = players[0].getMouseY();
+            this.targetX = mouseX;
+            this.targetY = mouseY;
             break;
         case 9: //corner the player! move to a spot near the player
             if (this.hitDestination)
@@ -346,6 +352,8 @@ PowerUp.prototype.update = function () {
                         deadEnemies.push(enemys[i]);
                     }
                 }
+                //expand
+                this.radius += .2; //expand
                 break;
             case booms.DIAMOND:
                 for (let i = 0; i < enemys.length; i++) //check if the enemys hits the diamond
@@ -368,6 +376,7 @@ PowerUp.prototype.update = function () {
                         deadEnemies.push(enemys[i]);
                     }
                 }
+                this.radius += .15;
                 break;
         }//switch
     }//if awake an active
@@ -394,7 +403,6 @@ PowerUp.prototype.render = function () {
         ctx.fill();
     } else switch(this.type) {
         case booms.BIG_DISK:
-            this.radius += .15; //expand
         case booms.DISK:  // draw our circle with x and y being the center, radius ratio of 5.
             ctx.beginPath();
             ctx.arc(x, y, rad * 5, 0, Math.PI * 2);
@@ -419,7 +427,6 @@ PowerUp.prototype.render = function () {
             ctx.stroke();
             ctx.closePath();
             ctx.fill();
-            this.radius += .2; //expand
             break;
         case booms.DIAMOND: // diamond
             ctx.beginPath()
@@ -471,12 +478,12 @@ function world() {
 
     enemySpawner = setInterval( function()
     {
-        enemys[enemys.length] = new Enemy(randTo(2) * window.width,randTo(2) * window.height,10, "rgb(" + randTo(256) + "," + randTo(256) + "," + randTo(256) + ")", 2.5, randTo(10));
+        enemys[enemys.length] = new Enemy(randTo(2) * canvas.width,randTo(2) * canvas.height,10, "rgb(" + randTo(256) + "," + randTo(256) + "," + randTo(256) + ")", 2.5, randTo(10));
     }, 250);
 
     powerupSpawner = setInterval( function()
     {
-        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randomPowerUp());        
+        powerups[powerups.length] = new PowerUp(randTo(canvas.width) + 1, randTo(canvas.height) + 1, randomPowerUp());        
     }, 500); //TODO set back to 2000
 
     timeTracker = setInterval( function()
@@ -498,7 +505,7 @@ function render() {
         pw.render();
     });
 
-    players[0].update(mX, mY);
+    players[0].update(mouseX, mouseY);
     players[0].render();
 
     ctx.font = "30px Comic Sans MS";
