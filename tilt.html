@@ -58,7 +58,6 @@ var Player = function (x, y, radius, color, hp) {
     this.hp = hp || 10;
     this.velX = 0;
     this.velY = 0;
-    this.ratio = 0;
     this.immune = false;
     console.log("new player");
 }
@@ -78,7 +77,6 @@ Player.prototype.update = function (x, y) {
      * divide the target x and y by the distance and multiply it by our speed
      * this gives us a constant movement speed.
      */
-
     this.velX = (tx / dist) * this.speed;
     this.velY = (ty / dist) * this.speed;
 
@@ -92,21 +90,21 @@ Player.prototype.update = function (x, y) {
 
 Player.prototype.render = function () {
     ctx.fillStyle = this.color;
-    // draw our triangle with x and y being the center, and points twards mouse! MATH! (I spent 30 minutes on this qq)
+    // draw our triangle with x and y being the center, and points twards mouse
     var dx = this.targetX - this.x
     var dy = this.targetY - this.y
     ctx.beginPath();
     //this line basically makes our length constant, because the distance from the mouse can vary, we cannot just blindly move twards the mouse location when drawing
-    this.ratio = this.radius / Math.sqrt(dx * dx + dy * dy);
+    let myLength = this.radius / Math.sqrt(dx * dx + dy * dy);
     //since we have the ratio, we just multiply it by the difference of X/Y. This is the Tip of the player.
-    ctx.moveTo(this.x + this.ratio * dx, this.y + this.ratio * dy );
-    ctx.lineTo(this.x - this.ratio * dy - this.ratio * dx,
-        this.y + this.ratio * dx - this.ratio * dy);
+    ctx.moveTo(this.x + myLength * dx, this.y + myLength * dy );
+    ctx.lineTo(this.x - myLength * dy - myLength * dx,
+        this.y + myLength * dx - myLength * dy);
     ctx.stroke();
-    ctx.lineTo(this.x + this.ratio * dy - this.ratio * dx,
-        this.y - this.ratio * dx - this.ratio * dy);
+    ctx.lineTo(this.x + myLength * dy - myLength * dx,
+        this.y - myLength * dx - myLength * dy);
     ctx.stroke();
-    ctx.lineTo(this.x + this.ratio * dx, this.y + this.ratio * dy );
+    ctx.lineTo(this.x + myLength * dx, this.y + myLength * dy );
     ctx.stroke();
     ctx.closePath();
     ctx.fill();
@@ -212,11 +210,10 @@ Enemy.prototype.update = function () {
      * divide the target x and y by the distance and multiply it by our speed
      * this gives us a constant movement speed.
      */
-
     this.velX = (tx / dist) * this.speed;
     this.velY = (ty / dist) * this.speed;
 
-    // Stop once we hit our target. This stops the jittery bouncing of the object.
+    // Stop once we hit our target. This stops the jittery bouncing.
     // Basically only move when we are not there yet
     // Also change hitDestination to true, so some AI's can use it.
     if (dist > this.radius / 2) {
@@ -247,18 +244,10 @@ Enemy.prototype.render = function () { // draw our circle with x and y being the
     ctx.fill();
 };
 
-Enemy.prototype.getX = function () {
-    return this.x;
-};
-
-Enemy.prototype.getY = function () {
-    return this.y;
-};
-
-Enemy.prototype.getRadius = function () {
-    return this.radius;
-};
-//end of enemy class
+Enemy.prototype.getX = function () { return this.x; };
+Enemy.prototype.getY = function () { return this.y; };
+Enemy.prototype.getRadius = function () { return this.radius; };
+// end of enemy class
 
 
 //TODO bosses spawn per 25 enemies killed
@@ -305,7 +294,7 @@ PowerUp.prototype.update = function () {
         let that = this;
         setTimeout(function () {
             console.log("powerup expired: " + that.type);
-            if (that.type == 3) {
+            if (that.type == booms.DIAMOND) {
                 console.log("spawn 4 powerups");
                 let delta = that.radius * 5;
                 const offsets = [
@@ -386,61 +375,65 @@ PowerUp.prototype.update = function () {
 
 PowerUp.prototype.render = function () {
     ctx.fillStyle  = this.color;
-    if ( !this.active ) //draw a small black diamond at x and y to indicate a power up.
+    let x = this.getX();
+    let y = this.getY();
+    let rad = this.getRadius();
+    if ( !this.active ) //small black diamond to indicate a power up.
     {
-          ctx.beginPath();
-          ctx.moveTo(this.x + this.radius, this.y);
-          ctx.lineTo(this.x, this.y - this.radius);
-          ctx.stroke();
-          ctx.lineTo(this.x - this.radius, this.y);
-          ctx.stroke();
-          ctx.lineTo(this.x, this.y + this.radius);
-          ctx.stroke();
-          ctx.lineTo(this.x + this.radius, this.y);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + rad, y);
+        ctx.lineTo(x, y - rad);
+        ctx.stroke();
+        ctx.lineTo(x - rad, y);
+        ctx.stroke();
+        ctx.lineTo(x, y + rad);
+        ctx.stroke();
+        ctx.lineTo(x + rad, y);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fill();
     } else switch(this.type) {
         case booms.BIG_DISK:
-          this.radius += .2; //expand
+            this.radius += .15; //expand
         case booms.DISK:  // draw our circle with x and y being the center, radius ratio of 5.
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.fill();
-          break;
+            ctx.beginPath();
+            ctx.arc(x, y, rad * 5, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+            break;
         case booms.PLUS: //draw a + with height / width radius * 40 NERF!
-          let size = 40;
-          ctx.fillRect(this.x - this.radius, this.y - this.radius * size/2, this.radius * 2, this.radius * size);
-          ctx.fillRect(this.x - this.radius * size/2, this.y - this.radius, this.radius * size, 2 * this.radius);
-          break;
-        case booms.CIRCLE: //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius * 8, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 7, this.y);
-          ctx.stroke();
-          ctx.arc(this.x, this.y, this.radius * 7, 0 , Math.PI * 2, true);
-          ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 8, this.y);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.fill();
-          this.radius += .23; //expand
-          break;
+            let size = 40;
+            ctx.fillRect(x - rad, y - rad * size/2, rad * 2, rad * size);
+            ctx.fillRect(x - rad * size/2, y - rad, rad * size, 2 * rad);
+            break;
+        case booms.CIRCLE: //draw a ring
+            let inner = 7, outer = 7.7; //inner vs outer ratios
+            ctx.beginPath();
+            ctx.arc(x, y, rad * outer, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.lineTo(x + rad * inner, y);
+            ctx.stroke();
+            ctx.arc(x, y, rad * inner, 0 , Math.PI * 2, true);
+            ctx.stroke();
+            ctx.lineTo(x + rad * outer, y);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.fill();
+            this.radius += .2; //expand
+            break;
         case booms.DIAMOND: // diamond
-          ctx.beginPath()
-          ctx.moveTo(this.x - this.radius * 5, this.y); 
-          ctx.lineTo(this.x , this.y - this.radius * 5);
-          ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 5, this.y);
-          ctx.stroke();
-          ctx.lineTo(this.x , this.y + this.radius * 5);
-          ctx.stroke();
-          ctx.lineTo(this.x - this.radius * 5, this.y);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.fill();
+            ctx.beginPath()
+            ctx.moveTo(x - rad * 5, y); 
+            ctx.lineTo(x , y - rad * 5);
+            ctx.stroke();
+            ctx.lineTo(x + rad * 5, y);
+            ctx.stroke();
+            ctx.lineTo(x , y + rad * 5);
+            ctx.stroke();
+            ctx.lineTo(x - rad * 5, y);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.fill();
           break;
     }
 };
@@ -484,7 +477,7 @@ function world() {
     powerupSpawner = setInterval( function()
     {
         powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randomPowerUp());        
-    }, 2000);
+    }, 500); //TODO set back to 2000
 
     timeTracker = setInterval( function()
     {
@@ -493,22 +486,22 @@ function world() {
 }
 
 function render() {
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height); //clear background
 
-    for (let i = 0; i < enemys.length; i++ ){
-        enemys[i].update();
-        enemys[i].render();
-    }
+    enemys.map( (en) => {
+        en.update();
+        en.render();
+    });
 
-    for (let i = 0; i < powerups.length; i++ ){
-        powerups[i].update();
-        powerups[i].render();
-    }
+    powerups.map ((pw) => {
+        pw.update();
+        pw.render();
+    });
 
     players[0].update(mX, mY);
     players[0].render();
 
-    ctx.font = "30px Arial";
+    ctx.font = "30px Comic Sans MS";
     ctx.fillText("Score: " + enemysKilled, width - 200 , 100);
     ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
 
