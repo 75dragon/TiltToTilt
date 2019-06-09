@@ -4,6 +4,7 @@
 <canvas id="canvas"></canvas>
 </body>
 <script>
+'use strict';
 var canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d"),
     width = window.innerWidth,
@@ -14,18 +15,27 @@ var canvas = document.getElementById("canvas"),
 canvas.width = width;
 canvas.height = height; 
 
-players = [];
-enemys = [];
-powerups = [];
+var players = [];
+var enemys = [];
+var powerups = [];
 var enemySpawner;
 var powerupSpawner;
 var timeTracker;
 var gameOn = true;
-deadPlayers = [];
-deadEnemies = [];
-deadPowerups = [];
+var deadPlayers = [];
+var deadEnemies = [];
+var deadPowerups = [];
 var enemysKilled = 0;
 var time = 0;
+
+//enum
+const booms = {
+    DISK: '0',
+    PLUS: '+',
+    CIRCLE: 'o',
+    DIMMOND: 'd',
+    
+}
 
 canvas.addEventListener("mousemove", function (e) {
     mX = e.pageX;
@@ -45,6 +55,7 @@ var Player = function (x, y, radius, color, hp) {
     this.velY = 0;
     this.ratio = 0;
     this.immune = false;
+    console.log("new player");
 }
 
 Player.prototype.update = function (x, y) {
@@ -145,6 +156,7 @@ var Enemy = function (x, y, radius, color, speed, ai) {
     this.velX = 0;
     this.velY = 0;
     this.hitDestination = true;
+    //console.log("new enemy");
 }
 
 Enemy.prototype.AI = function ( i ) {
@@ -215,7 +227,7 @@ Enemy.prototype.update = function () {
         this.hitDestination = true;
     }
 
-    for (var i = 0; i < players.length; i++)
+    for (let i = 0; i < players.length; i++)
     {
         if ((players[i].getRadius() + this.radius) * (players[i].getRadius() + this.radius) >
         (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
@@ -248,7 +260,7 @@ Enemy.prototype.getRadius = function () {
 
 
 //TODO bosses spawn per 25 enemies killed
-var boss1 = function(level) {
+var Boss1 = function(level) {
     this.health = 150 * level;
     this.x = x || 0;
     this.y = y || 0;
@@ -259,10 +271,11 @@ var boss1 = function(level) {
     this.velX = 0;
     this.velY = 0;
     this.hitDestination = true;
+    console.log("new boss");
 }
 
 
-//start of powerup class
+//start of PowerUp class
 var PowerUp = function(x, y, type) {
     this.x = x;
     this.y = y;
@@ -271,11 +284,12 @@ var PowerUp = function(x, y, type) {
     this.color = "rgb(0,0,0)";
     this.awake = false;
     this.active = false;
+    console.log("new powerup");
 }
 
 PowerUp.prototype.update = function () {
-    if (!this.awake && !this.active) {//didn't hit but spawned
-        for (var i = 0; i < players.length; i++)
+    if (!this.awake && !this.active) { //didn't hit but spawned
+        for (let i = 0; i < players.length; i++)
         {
             if ((players[i].getRadius() + this.radius) * (players[i].getRadius() + this.radius) >
             (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
@@ -286,7 +300,7 @@ PowerUp.prototype.update = function () {
         }
     } else if (this.awake  && !this.active) { //second u hit
             this.active = true;
-            var that = this;
+            let that = this;
             setTimeout(function () {
                 console.log("time is up!");
                 deadPowerups.push(that);
@@ -294,7 +308,7 @@ PowerUp.prototype.update = function () {
     } else if (this.awake  && this.active) {
         switch(this.type) {
             case 0:
-                for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
+                for (let i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
                 {
                     if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
                     (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
@@ -304,7 +318,7 @@ PowerUp.prototype.update = function () {
                 }
                 break;
             case 1:
-                for (var i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 10. Nerf!
+                for (let i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 10. Nerf!
                 {
                     if (Math.abs(this.y - enemys[i].getY()) < this.radius + enemys[i].getRadius() &&
                     Math.abs(this.x - enemys[i].getX()) < this.radius * 20 ||
@@ -317,7 +331,7 @@ PowerUp.prototype.update = function () {
                 break;
 
             case 2:
-                for (var i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 7-8, if its inside it will live!
+                for (let i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 7-8, if its inside it will live!
                 {
                     if (Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
                      (this.x - enemys[i].getX())) < this.radius * 8 + enemys[i].getRadius() &&
@@ -329,7 +343,7 @@ PowerUp.prototype.update = function () {
                 }
                 break;
             case 3:
-                for (var i = 0; i < enemys.length; i++) //check if the enemys hits the diamond
+                for (let i = 0; i < enemys.length; i++) //check if the enemys hits the diamond
                 {
                     var dx = enemys[i].getX() - this.x;
                     var dy = enemys[i].getY() - this.y;
@@ -341,7 +355,7 @@ PowerUp.prototype.update = function () {
                 }
                 break;
             case 4:
-                for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
+                for (let i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
                 {
                     if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
                     (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
@@ -377,9 +391,10 @@ PowerUp.prototype.render = function () {
           ctx.closePath();
           ctx.fill();
     } else if ( this.type == 1 ) { //draw a + with height / width radius * 40 NERF!
+          let size = 40;
           ctx.fillStyle = this.color;
-          ctx.fillRect(this.x - this.radius, this.y - this.radius * 20, this.radius * 2, this.radius * 40);
-          ctx.fillRect(this.x - this.radius * 20, this.y - this.radius, this.radius * 40, 2 * this.radius);
+          ctx.fillRect(this.x - this.radius, this.y - this.radius * size/2, this.radius * 2, this.radius * size);
+          ctx.fillRect(this.x - this.radius * size/2, this.y - this.radius, this.radius * size, 2 * this.radius);
     } else if ( this.type == 2 ) { //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
           ctx.fillStyle = this.color;
           ctx.beginPath();
@@ -393,10 +408,11 @@ PowerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-    } else if ( this.type == 3 ) { //draw the + but an x
+          this.radius += .23; //expand
+    } else if ( this.type == 3 ) { // diamond
           ctx.fillStyle = this.color;
           ctx.beginPath()
-          ctx.moveTo(this.x - this.radius * 5, this.y);
+          ctx.moveTo(this.x - this.radius * 5, this.y); 
           ctx.lineTo(this.x , this.y - this.radius * 5);
           ctx.stroke();
           ctx.lineTo(this.x + this.radius * 5, this.y);
@@ -413,7 +429,7 @@ PowerUp.prototype.render = function () {
           ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
           ctx.closePath();
           ctx.fill();
-          this.radius += .2;
+          this.radius += .2; //expand
     }
 };
 
@@ -431,6 +447,7 @@ function removePlayer(dead) {
     players.splice(players.indexOf(dead), 1);
     if (players.length <= 0)
     {
+        //alert('game over');
         console.log("GG");
         gameOn = false;
         clearInterval(enemySpawner);
@@ -441,7 +458,6 @@ function removePlayer(dead) {
 
 function removePowerup(dead) {
     powerups.splice(powerups.indexOf(dead), 1);
-    console.log("powerup down");
 }
 
 function world() {
@@ -450,13 +466,12 @@ function world() {
 
     enemySpawner = setInterval( function()
     {
-        enemys[enemys.length] = new Enemy(randTo(2) * window.width,randTo(2) * window.height,10, "rgb(" + randTo(256) + "," + randTo(256) + "," + randTo(256) + ")", 3, randTo(10));
+        enemys[enemys.length] = new Enemy(randTo(2) * window.width,randTo(2) * window.height,10, "rgb(" + randTo(256) + "," + randTo(256) + "," + randTo(256) + ")", 2.5, randTo(10));
     }, 250);
 
     powerupSpawner = setInterval( function()
     {
-        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randTo(5));
-        console.log("new powerup");
+        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randTo(5));        
     }, 2000);
 
     timeTracker = setInterval( function()
@@ -468,12 +483,12 @@ function world() {
 function render() {
     ctx.clearRect(0, 0, width, height);
 
-    for (var i = 0; i < enemys.length; i++ ){
+    for (let i = 0; i < enemys.length; i++ ){
         enemys[i].update();
         enemys[i].render();
     }
 
-    for (var i = 0; i < powerups.length; i++ ){
+    for (let i = 0; i < powerups.length; i++ ){
         powerups[i].update();
         powerups[i].render();
     }
