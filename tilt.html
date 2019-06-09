@@ -99,8 +99,8 @@ Player.prototype.update = function (x, y) {
 Player.prototype.render = function () {
     ctx.fillStyle = this.color;
     // draw our triangle with x and y being the center, and points twards mouse
-    var dx = this.targetX - this.x
-    var dy = this.targetY - this.y
+    let dx = this.targetX - this.x
+    let dy = this.targetY - this.y
     ctx.beginPath();
     //this line basically makes our length constant, because the distance from the mouse can vary, we cannot just blindly move twards the mouse location when drawing
     let myLength = this.radius / Math.sqrt(dx * dx + dy * dy);
@@ -297,20 +297,27 @@ PowerUp.prototype.update = function () {
         }
     } else if (this.awake  && !this.active) { //second u hit
         this.active = true;
+        if (this.type == booms.DISK) {
+            //find and save direction
+            let me = players[0];
+            let dx = me.targetX - me.x;
+            let dy = me.targetY - me.y;
+            let norm = Math.sqrt(dx*dx + dy*dy);
+            this.dx = dx/norm;
+            this.dy = dy/norm;
+        }
         let that = this;
         setTimeout(function () {
             console.log("powerup expired: " + that.type);
             if (that.type == booms.DIAMOND) {
                 console.log("spawn 4 powerups");
                 let delta = that.radius * 5;
-                const offsets = [
+                [ //offsets
                     [that.x + delta, that.y],
                     [that.x - delta, that.y],
                     [that.x, that.y + delta],
                     [that.x, that.y - delta]
-                ]
-
-                offsets.map((vec) => {
+                ].map((vec) => {
                     powerups[powerups.length] = new PowerUp(vec[0], vec[1], randomPowerUp());
                 })
             }
@@ -327,6 +334,9 @@ PowerUp.prototype.update = function () {
                         deadEnemies.push(enemys[i]);
                     }
                 }
+                //move the disk
+                this.x += this.dx * 3
+                this.y += this.dy * 3
                 break;
             case booms.PLUS:
                 for (let i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 10. Nerf!
@@ -447,7 +457,6 @@ PowerUp.prototype.render = function () {
 
 PowerUp.prototype.getY = function () { return this.y; }
 PowerUp.prototype.getX = function () { return this.x; }
-PowerUp.prototype.getX = function () { return this.x; }
 PowerUp.prototype.getRadius = function () { return this.radius; }
 
 function removeEnemy(dead) {
@@ -484,7 +493,7 @@ function world() {
     powerupSpawner = setInterval( function()
     {
         powerups[powerups.length] = new PowerUp(randTo(canvas.width) + 1, randTo(canvas.height) + 1, randomPowerUp());        
-    }, 500); //TODO set back to 2000
+    }, 2000);
 
     timeTracker = setInterval( function()
     {
