@@ -33,8 +33,13 @@ const booms = {
     DISK: '0',
     PLUS: '+',
     CIRCLE: 'o',
-    DIMMOND: 'd',
-    
+    DIAMOND: 'dimd',
+    BIG_DISK: '1'
+}
+
+function randomPowerUp() {
+    let keys = Object.keys(booms);
+    return booms[keys[randTo(keys.length)]];
 }
 
 canvas.addEventListener("mousemove", function (e) {
@@ -126,7 +131,7 @@ Player.prototype.takeHit = function (dmg) {
     if (!this.immune)
     {
         this.hp -= dmg;
-        console.log("ouch!" + this.hp)
+        console.log("ouch! hp:" + this.hp)
         if ( this.hp > 0 )
         {
           this.immune(dmg * 2);
@@ -311,14 +316,14 @@ PowerUp.prototype.update = function () {
                 ]
 
                 offsets.map((vec) => {
-                    powerups[powerups.length] = new PowerUp(vec[0], vec[1], randTo(5));
+                    powerups[powerups.length] = new PowerUp(vec[0], vec[1], randomPowerUp());
                 })
             }
             deadPowerups.push(that);
         }, 1000, this);
     } else if (this.awake  && this.active) {
         switch(this.type) {
-            case 0:
+            case booms.DISK:
                 for (let i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
                 {
                     if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
@@ -328,7 +333,7 @@ PowerUp.prototype.update = function () {
                     }
                 }
                 break;
-            case 1:
+            case booms.PLUS:
                 for (let i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 10. Nerf!
                 {
                     if (Math.abs(this.y - enemys[i].getY()) < this.radius + enemys[i].getRadius() &&
@@ -341,7 +346,7 @@ PowerUp.prototype.update = function () {
                 }
                 break;
 
-            case 2:
+            case booms.CIRCLE:
                 for (let i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 7-8, if its inside it will live!
                 {
                     if (Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
@@ -353,7 +358,7 @@ PowerUp.prototype.update = function () {
                     }
                 }
                 break;
-            case 3:
+            case booms.DIAMOND:
                 for (let i = 0; i < enemys.length; i++) //check if the enemys hits the diamond
                 {
                     var dx = enemys[i].getX() - this.x;
@@ -365,7 +370,7 @@ PowerUp.prototype.update = function () {
                     }
                 }
                 break;
-            case 4:
+            case booms.BIG_DISK:
                 for (let i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
                 {
                     if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
@@ -380,9 +385,9 @@ PowerUp.prototype.update = function () {
 };
 
 PowerUp.prototype.render = function () {
+    ctx.fillStyle  = this.color;
     if ( !this.active ) //draw a small black diamond at x and y to indicate a power up.
     {
-          ctx.fillStyle = this.color;
           ctx.beginPath();
           ctx.moveTo(this.x + this.radius, this.y);
           ctx.lineTo(this.x, this.y - this.radius);
@@ -395,19 +400,21 @@ PowerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-    } else if ( this.type == 0 ) { // draw our circle with x and y being the center, radius ratio of 5.
-          ctx.fillStyle = this.color;
+    } else switch(this.type) {
+        case booms.BIG_DISK:
+          this.radius += .2; //expand
+        case booms.DISK:  // draw our circle with x and y being the center, radius ratio of 5.
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
           ctx.closePath();
           ctx.fill();
-    } else if ( this.type == 1 ) { //draw a + with height / width radius * 40 NERF!
+          break;
+        case booms.PLUS: //draw a + with height / width radius * 40 NERF!
           let size = 40;
-          ctx.fillStyle = this.color;
           ctx.fillRect(this.x - this.radius, this.y - this.radius * size/2, this.radius * 2, this.radius * size);
           ctx.fillRect(this.x - this.radius * size/2, this.y - this.radius, this.radius * size, 2 * this.radius);
-    } else if ( this.type == 2 ) { //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
-          ctx.fillStyle = this.color;
+          break;
+        case booms.CIRCLE: //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius * 8, 0, Math.PI * 2);
           ctx.stroke();
@@ -420,8 +427,8 @@ PowerUp.prototype.render = function () {
           ctx.closePath();
           ctx.fill();
           this.radius += .23; //expand
-    } else if ( this.type == 3 ) { // diamond
-          ctx.fillStyle = this.color;
+          break;
+        case booms.DIAMOND: // diamond
           ctx.beginPath()
           ctx.moveTo(this.x - this.radius * 5, this.y); 
           ctx.lineTo(this.x , this.y - this.radius * 5);
@@ -434,13 +441,7 @@ PowerUp.prototype.render = function () {
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
-    } else if ( this.type == 4 ) { // draw our circle with x and y being the center, radius ratio of 5.
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.fill();
-          this.radius += .2; //expand
+          break;
     }
 };
 
@@ -482,7 +483,7 @@ function world() {
 
     powerupSpawner = setInterval( function()
     {
-        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randTo(5));        
+        powerups[powerups.length] = new PowerUp(randTo(window.width) + 1, randTo(window.height) + 1, randomPowerUp());        
     }, 2000);
 
     timeTracker = setInterval( function()
