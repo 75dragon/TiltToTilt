@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<script src="Game.js"></script>
 <body>
 <canvas id="canvas"></canvas>
 </body>
@@ -242,6 +243,9 @@ Enemy.prototype.render = function () { // draw our circle with x and y being the
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#000000";
+    ctx.stroke();
 };
 
 Enemy.prototype.getX = function () {
