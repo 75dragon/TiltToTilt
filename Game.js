@@ -300,49 +300,49 @@ class PowerUp
           }, 1000, this);
       } else if (this.awake == true && this.active == true) {
           if (this.type == 0) {
-          for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
+          for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 8 * radius or closer.
           {
-            if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
+            if ((enemys[i].getRadius() + this.radius * 8) * (enemys[i].getRadius() + this.radius * 8) >
             (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
             {
               deadEnemies.push(enemys[i]);
             }
           }
         } else if (this.type == 1) {
-            for (var i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 10. Nerf!
+            for (var i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 15. Nerf!
             {
               if (Math.abs(this.y - enemys[i].getY()) < this.radius + enemys[i].getRadius() &&
-              Math.abs(this.x - enemys[i].getX()) < this.radius * 20 ||
+              Math.abs(this.x - enemys[i].getX()) < this.radius * 15 ||
               Math.abs(this.x - enemys[i].getX()) < this.radius + enemys[i].getRadius() &&
-              Math.abs(this.y - enemys[i].getY()) < this.radius * 20 )
+              Math.abs(this.y - enemys[i].getY()) < this.radius * 15 )
               {
                 deadEnemies.push(enemys[i]);
               }
             }
         } else if (this.type == 2) {
-          for (var i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 7-8, if its inside it will live!
+          for (var i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 9-10, if its inside it will live!
           {
             if (Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
-             (this.x - enemys[i].getX())) < this.radius * 8 + enemys[i].getRadius() &&
+             (this.x - enemys[i].getX())) < this.radius * 10 + enemys[i].getRadius() &&
              Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
-              (this.x - enemys[i].getX())) > this.radius * 7 - enemys[i].getRadius())
+              (this.x - enemys[i].getX())) > this.radius * 9 - enemys[i].getRadius())
             {
               deadEnemies.push(enemys[i]);
             }
           }
         } else if (this.type == 3) {
-          for (var i = 0; i < enemys.length; i++) //check if the enemys hits the diamond
+          for (var i = 0; i < enemys.length; i++) //check if the enemys hits the diamond, size 8
           {
             var dx = enemys[i].getX() - this.x;
             var dy = enemys[i].getY() - this.y;
-            var r = this.radius * 5 + enemys[i].getRadius();
+            var r = this.radius * 8 + enemys[i].getRadius();
             if ( Math.abs(dy - dx) <= r && Math.abs (dy + dx) <= r)
             {
               deadEnemies.push(enemys[i]);
             }
           }
         } else if (this.type == 4) {
-        for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer.
+        for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer, but grows.
         {
           if ((enemys[i].getRadius() + this.radius * 5) * (enemys[i].getRadius() + this.radius * 5) >
           (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
@@ -373,37 +373,37 @@ class PowerUp
       } else if ( this.type == 0 ) { // draw our circle with x and y being the center, radius ratio of 5.
           ctx.fillStyle = this.color;
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius * 5, 0, Math.PI * 2);
+          ctx.arc(this.x, this.y, this.radius * 8, 0, Math.PI * 2);
           ctx.closePath();
           ctx.fill();
       } else if ( this.type == 1 ) { //draw a + with height / width radius * 40 NERF!
           ctx.fillStyle = this.color;
-          ctx.fillRect(this.x - this.radius, this.y - this.radius * 20, this.radius * 2, this.radius * 40);
-          ctx.fillRect(this.x - this.radius * 20, this.y - this.radius, this.radius * 40, 2 * this.radius);
+          ctx.fillRect(this.x - this.radius, this.y - this.radius * 15, this.radius * 2, this.radius * 30);
+          ctx.fillRect(this.x - this.radius * 15, this.y - this.radius, this.radius * 30, 2 * this.radius);
       } else if ( this.type == 2 ) { //draw a ring, the inner circle is a radius ratio of 7 and outer 8.
           ctx.fillStyle = this.color;
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius * 8, 0, Math.PI * 2);
+          ctx.arc(this.x, this.y, this.radius * 10, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 7, this.y);
+          ctx.lineTo(this.x + this.radius * 9, this.y);
           ctx.stroke();
-          ctx.arc(this.x, this.y, this.radius * 7, 0 , Math.PI * 2, true);
+          ctx.arc(this.x, this.y, this.radius * 9, 0 , Math.PI * 2, true);
           ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 8, this.y);
+          ctx.lineTo(this.x + this.radius * 10, this.y);
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
       } else if ( this.type == 3 ) { //draw the + but an x
           ctx.fillStyle = this.color;
           ctx.beginPath()
-          ctx.moveTo(this.x - this.radius * 5, this.y);
-          ctx.lineTo(this.x , this.y - this.radius * 5);
+          ctx.moveTo(this.x - this.radius * 8, this.y);
+          ctx.lineTo(this.x , this.y - this.radius * 8);
           ctx.stroke();
-          ctx.lineTo(this.x + this.radius * 5, this.y);
+          ctx.lineTo(this.x + this.radius * 8, this.y);
           ctx.stroke();
-          ctx.lineTo(this.x , this.y + this.radius * 5);
+          ctx.lineTo(this.x , this.y + this.radius * 8);
           ctx.stroke();
-          ctx.lineTo(this.x - this.radius * 5, this.y);
+          ctx.lineTo(this.x - this.radius * 8, this.y);
           ctx.stroke();
           ctx.closePath();
           ctx.fill();
@@ -437,9 +437,7 @@ class PowerUp
       return this.radius;
     }
 }
-//import { Enemy } from './Enemy.js';
-//import { Player } from './Player.js';
-//import { PowerUp } from './PowerUp.js';
+
 
 canvas.addEventListener("mousemove", function (e) {
     mX = e.pageX;
@@ -479,9 +477,9 @@ function world() {
 
     powerupSpawner = setInterval( function()
     {
-        powerups[powerups.length] = new powerUp(Math.floor(Math.random() * window.width) + 1,Math.floor(Math.random() * window.height) + 1, 4);//Math.floor(Math.random() * 4)
+        powerups[powerups.length] = new PowerUp(Math.floor(Math.random() * window.width) + 1,Math.floor(Math.random() * window.height) + 1, Math.floor(Math.random() * 5));//Math.floor(Math.random() * 4)
         console.log("new powerup");
-    }, 2000);
+    }, 500);
 
     timeTracker = setInterval( function()
     {
