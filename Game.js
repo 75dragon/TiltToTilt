@@ -25,61 +25,26 @@ var time = 0;
 
 class Enemy
 {
-  constructor(x, y, radius, color, speed, ai)
+  constructor(x, y, radius, color, speed)
   {
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 10;
     this.speed = speed || 3;
     this.color = color || "rgb(0,0,255)";
-    this.ai = ai;
     this.velX = 0;
     this.velY = 0;
     this.hitDestination = true;
   }
 
-  AI(i)
+  AI() //override this
   {
-    switch(i)
-    {
-        case 0: // move beween random spots
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-            if (this.hitDestination)
-            {
-                this.targetX = Math.floor(Math.random() * window.width) + 1;
-                this.targetY = Math.floor(Math.random() * window.height) + 1;
-                this.hitDestination = false;
-            }
-            break;
-        case 7: // follow player
-            this.targetX = players[0].getX();
-            this.targetY = players[0].getY();
-            break;
-
-        case 8: //move to where the player's mouse is
-            this.targetX = players[0].getMouseX();
-            this.targetY = players[0].getMouseY();
-            break;
-        case 9: //corner the player! move to a spot near the player
-            if (this.hitDestination)
-            {
-                this.targetX = players[0].getX() + Math.floor(Math.random() * 500) - 250;
-                this.targetY = players[0].getY() + Math.floor(Math.random() * 500) - 250;
-                this.hitDestination = false;
-            }
-            break;
-    }
   }
 
   update()
   {
     // get the target x and y from AI
-    this.AI( this.ai );
+    this.AI();
 
     // We need to get the distance this time around
     var tx = this.targetX - this.x,
@@ -146,6 +111,69 @@ class Enemy
   }
 }
 
+class RandomEnemy extends Enemy
+{
+  constructor(x, y, radius, color, speed, ai)
+  {
+    super(x, y, radius, color, speed, ai)
+  }
+
+  AI()
+  {
+    if (this.hitDestination)
+    {
+        this.targetX = Math.floor(Math.random() * window.width) + 1;
+        this.targetY = Math.floor(Math.random() * window.height) + 1;
+        this.hitDestination = false;
+    }
+  }
+}
+
+class TrapEnemy extends Enemy
+{
+  constructor(x, y, radius, color, speed)
+  {
+    super(x, y, radius, color, speed)
+  }
+
+  AI()
+  {
+    if (this.hitDestination)
+    {
+        this.targetX = players[0].getX() + Math.floor(Math.random() * 500) - 250;
+        this.targetY = players[0].getY() + Math.floor(Math.random() * 500) - 250;
+        this.hitDestination = false;
+    }
+  }
+}
+
+class FollowEnemy extends Enemy
+{
+  constructor(x, y, radius, color, speed)
+  {
+    super(x, y, radius, color, speed)
+  }
+
+  AI()
+  {
+    this.targetX = players[0].getX();
+    this.targetY = players[0].getY();
+  }
+}
+
+class MouseEnemy extends Enemy
+{
+  constructor(x, y, radius, color, speed)
+  {
+    super(x, y, radius, color, speed)
+  }
+
+  AI()
+  {
+    this.targetX = players[0].getMouseX();
+    this.targetY = players[0].getMouseY();
+  }
+}
 
 class Player
 {
@@ -472,7 +500,29 @@ function world() {
 
     enemySpawner = setInterval( function()
     {
-        enemys[enemys.length] = new Enemy(Math.floor(Math.random() * 2) * window.width,Math.floor(Math.random() * 2) * window.height,10, "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")", 3, Math.floor(Math.random() * 10));
+      xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
+      ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
+      spawnRadius = 10;
+      spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+      spawnSpeed = 3;
+      spawnAI = Math.floor(Math.random() * 10);
+      if (spawnAI < 7)
+      {
+        enemys[enemys.length] = new RandomEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
+      }
+      else if (spawnAI < 8)
+      {
+        enemys[enemys.length] = new TrapEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
+      }
+      else if ( spawnAI < 9)
+      {
+        enemys[enemys.length] = new MouseEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
+      }
+      else
+      {
+        enemys[enemys.length] = new FollowEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
+      }
+
     }, 250);
 
     powerupSpawner = setInterval( function()
