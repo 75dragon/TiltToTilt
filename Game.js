@@ -23,6 +23,7 @@ deadEnemies = [];
 deadPowerups = [];
 var enemysKilled = 0;
 var time = 0;
+var countInt = 0;
 
 
 
@@ -598,76 +599,95 @@ function removePowerup(dead)
   console.log("powerup down");
 }
 
+function spawnEnemy()
+{
+  xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
+  ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
+  spawnRadius = 10;
+  spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+  spawnSpeed = 3;
+  spawnAI = Math.floor(Math.random() * 10);
+  if (spawnAI < 7)
+  {
+    enemys[enemys.length] = new RandomEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+  }
+  else if (spawnAI < 8)
+  {
+    enemys[enemys.length] = new TrapEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+  }
+  else if (spawnAI < 9)
+  {
+    enemys[enemys.length] = new MouseEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+  }
+  else
+  {
+    enemys[enemys.length] = new FollowEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+  }
+}
+
+function spawnPowerUp()
+{
+  xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
+  yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
+  spawnType = Math.floor(Math.random() * 5);
+  if (spawnType < 1)
+  {
+    powerups[powerups.length] = new CirclePowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+  }
+  else if (spawnType < 2)
+  {
+    powerups[powerups.length] = new DiamondPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+  }
+  else if (spawnType < 3)
+  {
+    powerups[powerups.length] = new CrossPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+  }
+  else if (spawnType < 4)
+  {
+    powerups[powerups.length] = new RingPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+  }
+  else
+  {
+    powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+  }
+}
+
+function onTimer()
+{
+  spawnEnemy();
+  countInt++;
+  if (countInt == 1  || countInt == 3)
+  {
+    spawnPowerUp();
+  }
+  if (countInt == 3)
+  {
+    time++;
+    countInt = 0;
+  }
+}
+
+function worldTimer()
+{
+  globalTimer = setInterval(function()
+  {
+    onTimer();
+  }, 250);
+}
+
 function world()
 {
   var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
   players[0] = player1;
-
-  enemySpawner = setInterval(function()
-  {
-    xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
-    ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
-    spawnRadius = 10;
-    spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
-    spawnSpeed = 3;
-    spawnAI = Math.floor(Math.random() * 10);
-    if (spawnAI < 7)
-    {
-      enemys[enemys.length] = new RandomEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
-    }
-    else if (spawnAI < 8)
-    {
-      enemys[enemys.length] = new TrapEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
-    }
-    else if (spawnAI < 9)
-    {
-      enemys[enemys.length] = new MouseEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
-    }
-    else
-    {
-      enemys[enemys.length] = new FollowEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
-    }
-
-  }, 250);
-
-  powerupSpawner = setInterval(function()
-  {
-    xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
-    yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
-    spawnType = Math.floor(Math.random() * 5);
-    if (spawnType < 1)
-    {
-      powerups[powerups.length] = new CirclePowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
-    }
-    else if (spawnType < 2)
-    {
-      powerups[powerups.length] = new DiamondPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
-    }
-    else if (spawnType < 3)
-    {
-      powerups[powerups.length] = new CrossPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
-    }
-    else if (spawnType < 4)
-    {
-      powerups[powerups.length] = new RingPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
-    }
-    else
-    {
-      powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
-    }
-    //powerups[powerups.length] = new PowerUp(Math.floor(Math.random() * window.width) + 1,Math.floor(Math.random() * window.height) + 1, Math.floor(Math.random() * 5));//Math.floor(Math.random() * 4)
-    console.log("new powerup");
-  }, 500);
-
-  timeTracker = setInterval(function()
-  {
-    time++;
-  }, 1000);
+  worldTimer();
 }
 
 function startRender()
 {
   ctx.clearRect(0, 0, width, height);
+  ctx.font = "30px Arial";
+  ctx.fillText("Welcome to TiltToTilt ", width - 200, 100);
+  ctx.fillText("Control a ship while avoiding the dots", width - 200, 150);
 }
 
 function render()
