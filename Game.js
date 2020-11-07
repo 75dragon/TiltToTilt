@@ -5,6 +5,9 @@ var canvas = document.getElementById("canvas"),
     mX = width/2,
     mY = height/2;
 
+//canvas.style.width = window.innerWidth;
+//canvas.style.height = window.innerHeight;
+
 canvas.width = width;
 canvas.height = height;
 
