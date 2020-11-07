@@ -1,9 +1,9 @@
 var canvas = document.getElementById("canvas"),
-    ctx = canvas.getContext("2d"),
-    width = window.innerWidth,
-    height = window.innerHeight,
-    mX = width/2,
-    mY = height/2;
+  ctx = canvas.getContext("2d"),
+  width = window.innerWidth,
+  height = window.innerHeight,
+  mX = width / 2,
+  mY = height / 2;
 
 //canvas.style.width = window.innerWidth;
 //canvas.style.height = window.innerHeight;
@@ -41,8 +41,7 @@ class Enemy
   }
 
   AI() //override this
-  {
-  }
+  {}
 
   update()
   {
@@ -51,8 +50,8 @@ class Enemy
 
     // We need to get the distance this time around
     var tx = this.targetX - this.x,
-        ty = this.targetY - this.y,
-        dist = Math.sqrt(tx * tx + ty * ty);
+      ty = this.targetY - this.y,
+      dist = Math.sqrt(tx * tx + ty * ty);
 
     /*
      * we calculate a velocity for our object this time around
@@ -66,20 +65,21 @@ class Enemy
     // Stop once we hit our target. This stops the jittery bouncing of the object.
     // Basically only move when we are not there yet
     // Also change hitDestination to true, so some AI's can use it.
-    if (dist > this.radius / 2) {
-        // add our velocities
-        this.x += this.velX;
-        this.y += this.velY;
+    if (dist > this.radius / 2)
+    {
+      // add our velocities
+      this.x += this.velX;
+      this.y += this.velY;
     }
     else
     {
-        this.hitDestination = true;
+      this.hitDestination = true;
     }
 
     for (var i = 0; i < players.length; i++)
     {
       if ((players[i].getRadius() + this.radius) * (players[i].getRadius() + this.radius) >
-      (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
+        (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
       {
         players[i].takeHit(1);
       }
@@ -125,9 +125,9 @@ class RandomEnemy extends Enemy
   {
     if (this.hitDestination)
     {
-        this.targetX = Math.floor(Math.random() * window.width) + 1;
-        this.targetY = Math.floor(Math.random() * window.height) + 1;
-        this.hitDestination = false;
+      this.targetX = Math.floor(Math.random() * window.width) + 1;
+      this.targetY = Math.floor(Math.random() * window.height) + 1;
+      this.hitDestination = false;
     }
   }
 }
@@ -143,9 +143,9 @@ class TrapEnemy extends Enemy
   {
     if (this.hitDestination)
     {
-        this.targetX = players[0].getX() + Math.floor(Math.random() * 500) - 250;
-        this.targetY = players[0].getY() + Math.floor(Math.random() * 500) - 250;
-        this.hitDestination = false;
+      this.targetX = players[0].getX() + Math.floor(Math.random() * 500) - 250;
+      this.targetY = players[0].getY() + Math.floor(Math.random() * 500) - 250;
+      this.hitDestination = false;
     }
   }
 }
@@ -202,8 +202,8 @@ class Player
 
     // We need to get the distance this time around
     var tx = this.targetX - this.x,
-        ty = this.targetY - this.y,
-        dist = Math.sqrt(tx * tx + ty * ty);
+      ty = this.targetY - this.y,
+      dist = Math.sqrt(tx * tx + ty * ty);
 
     /*
      * we calculate a velocity for our object this time around
@@ -215,10 +215,11 @@ class Player
     this.velY = (ty / dist) * this.speed;
 
     // Stop once we hit our target. This stops the jittery bouncing of the object.
-    if (dist > this.radius / 2) {
-        // add our velocities
-        this.x += this.velX;
-        this.y += this.velY;
+    if (dist > this.radius / 2)
+    {
+      // add our velocities
+      this.x += this.velX;
+      this.y += this.velY;
     }
   }
 
@@ -231,14 +232,14 @@ class Player
     //this line basically makes our length constant, because the distance from the mouse can vary, we cannot just blindly move twards the mouse location when drawing
     this.ratio = this.radius / Math.sqrt((this.targetX - this.x) * (this.targetX - this.x) + (this.targetY - this.y) * (this.targetY - this.y));
     //since we have the ratio, we just multiply it by the difference of X/Y. This is the Tip of the player.
-    ctx.moveTo( this.x + this.ratio * (this.targetX - this.x), this.y + this.ratio * (this.targetY - this.y) );
+    ctx.moveTo(this.x + this.ratio * (this.targetX - this.x), this.y + this.ratio * (this.targetY - this.y));
     ctx.lineTo(this.x - this.ratio * (this.targetY - this.y) - this.ratio * (this.targetX - this.x),
-        this.y + this.ratio * (this.targetX - this.x) - this.ratio * (this.targetY - this.y));
+      this.y + this.ratio * (this.targetX - this.x) - this.ratio * (this.targetY - this.y));
     ctx.stroke();
     ctx.lineTo(this.x + this.ratio * (this.targetY - this.y) - this.ratio * (this.targetX - this.x),
-        this.y - this.ratio * (this.targetX - this.x) - this.ratio * (this.targetY - this.y));
+      this.y - this.ratio * (this.targetX - this.x) - this.ratio * (this.targetY - this.y));
     ctx.stroke();
-    ctx.lineTo( this.x + this.ratio * (this.targetX - this.x), this.y + this.ratio * (this.targetY - this.y) );
+    ctx.lineTo(this.x + this.ratio * (this.targetX - this.x), this.y + this.ratio * (this.targetY - this.y));
     ctx.stroke();
     ctx.closePath();
     ctx.fill();
@@ -273,8 +274,9 @@ class Player
   {
     this.immune = true;
     var theplayer = this;
-    var hurt = setTimeout(function () {
-        theplayer.immune = false;
+    var hurt = setTimeout(function()
+    {
+      theplayer.immune = false;
     }, time * 1000);
   }
 
@@ -282,113 +284,120 @@ class Player
   {
     if (!this.immune)
     {
-        this.hp -= dmg;
-        console.log("ouch!" + this.hp)
-        if ( this.hp > 0 )
-        {
-          this.immune(dmg * 2);
-        }
+      this.hp -= dmg;
+      console.log("ouch!" + this.hp)
+      if (this.hp > 0)
+      {
+        this.immune(dmg * 2);
+      }
     }
     if (this.hp <= 0)
     {
-        deadPlayers.push(this);
+      deadPlayers.push(this);
     }
   }
 }
 
 class PowerUp
 {
-    constructor(x, y)
-    {
-      this.x = x;
-      this.y = y;
-      this.radius = 10;
-      this.color = "rgb(0,0,0)";
-      this.awake = false;
-      this.active = false;
-    }
+  constructor(x, y)
+  {
+    this.x = x;
+    this.y = y;
+    this.radius = 10;
+    this.color = "rgb(0,0,0)";
+    this.awake = false;
+    this.active = false;
+  }
 
-    activeEffect()
-    {
+  activeEffect()
+  {
 
-    }
+  }
 
-    update()
-    {
-      if (this.awake == false && this.active == false) {//didn't hit but spawned
-        for (var i = 0; i < players.length; i++)
-        {
-          if ((players[i].getRadius() + this.radius) * (players[i].getRadius() + this.radius) >
+  update()
+  {
+    if (this.awake == false && this.active == false)
+    { //didn't hit but spawned
+      for (var i = 0; i < players.length; i++)
+      {
+        if ((players[i].getRadius() + this.radius) * (players[i].getRadius() + this.radius) >
           (players[i].getX() - this.x) * (players[i].getX() - this.x) + (players[i].getY() - this.y) * (players[i].getY() - this.y))
-          {
-            this.awake = true;
-            console.log("powerup hit at: " + this.x + ", " + this.y);
-          }
+        {
+          this.awake = true;
+          console.log("powerup hit at: " + this.x + ", " + this.y);
         }
-      } else if (this.awake == true && this.active == false) { //second u hit
-          this.active = true;
-          var that = this;
-          setTimeout(function () {
-            console.log("time is up!");
-            deadPowerups.push(that);
-          }, 1000, this);
-      } else if (this.awake == true && this.active == true) {
-          this.activeEffect()
-    }}
-
-    inactiveRender()
-    {
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.moveTo(this.x + this.radius, this.y);
-      ctx.lineTo(this.x, this.y - this.radius);
-      ctx.stroke();
-      ctx.lineTo(this.x - this.radius, this.y);
-      ctx.stroke();
-      ctx.lineTo(this.x, this.y + this.radius);
-      ctx.stroke();
-      ctx.lineTo(this.x + this.radius, this.y);
-      ctx.stroke();
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    activeRender()
-    {
-
-    }
-
-    render()
-    {
-      if (!this.active)
-      {
-        this.inactiveRender()
-      }
-      else
-      {
-        this.activeRender()
       }
     }
-
-    getX()
-    {
-      return this.x;
+    else if (this.awake == true && this.active == false)
+    { //second u hit
+      this.active = true;
+      var that = this;
+      setTimeout(function()
+      {
+        console.log("time is up!");
+        deadPowerups.push(that);
+      }, 1000, this);
     }
-
-    getY()
+    else if (this.awake == true && this.active == true)
     {
-      return this.y;
+      this.activeEffect()
     }
+  }
 
-    getX()
-    {
-      return this.x;
-    }
+  inactiveRender()
+  {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(this.x + this.radius, this.y);
+    ctx.lineTo(this.x, this.y - this.radius);
+    ctx.stroke();
+    ctx.lineTo(this.x - this.radius, this.y);
+    ctx.stroke();
+    ctx.lineTo(this.x, this.y + this.radius);
+    ctx.stroke();
+    ctx.lineTo(this.x + this.radius, this.y);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fill();
+  }
 
-    getRadius()
+  activeRender()
+  {
+
+  }
+
+  render()
+  {
+    if (!this.active)
     {
-      return this.radius;
+      this.inactiveRender()
     }
+    else
+    {
+      this.activeRender()
+    }
+  }
+
+  getX()
+  {
+    return this.x;
+  }
+
+  getY()
+  {
+    return this.y;
+  }
+
+  getX()
+  {
+    return this.x;
+  }
+
+  getRadius()
+  {
+    return this.radius;
+  }
 }
 
 class CirclePowerUp extends PowerUp
@@ -403,7 +412,7 @@ class CirclePowerUp extends PowerUp
     for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 8 * radius or closer.
     {
       if ((enemys[i].getRadius() + this.radius * this.circleRadius) * (enemys[i].getRadius() + this.radius * this.circleRadius) >
-      (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
+        (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
       {
         deadEnemies.push(enemys[i]);
       }
@@ -434,7 +443,7 @@ class DiamondPowerUp extends PowerUp
       var dx = enemys[i].getX() - this.x;
       var dy = enemys[i].getY() - this.y;
       var r = this.radius * this.diamondRadius + enemys[i].getRadius();
-      if ( Math.abs(dy - dx) <= r && Math.abs (dy + dx) <= r)
+      if (Math.abs(dy - dx) <= r && Math.abs(dy + dx) <= r)
       {
         deadEnemies.push(enemys[i]);
       }
@@ -446,11 +455,11 @@ class DiamondPowerUp extends PowerUp
     ctx.fillStyle = this.color;
     ctx.beginPath()
     ctx.moveTo(this.x - this.radius * this.diamondRadius, this.y);
-    ctx.lineTo(this.x , this.y - this.radius * this.diamondRadius);
+    ctx.lineTo(this.x, this.y - this.radius * this.diamondRadius);
     ctx.stroke();
     ctx.lineTo(this.x + this.radius * this.diamondRadius, this.y);
     ctx.stroke();
-    ctx.lineTo(this.x , this.y + this.radius * this.diamondRadius);
+    ctx.lineTo(this.x, this.y + this.radius * this.diamondRadius);
     ctx.stroke();
     ctx.lineTo(this.x - this.radius * this.diamondRadius, this.y);
     ctx.stroke();
@@ -471,9 +480,9 @@ class CrossPowerUp extends PowerUp
     for (var i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 15. Nerf!
     {
       if (Math.abs(this.y - enemys[i].getY()) < this.radius + enemys[i].getRadius() &&
-      Math.abs(this.x - enemys[i].getX()) < this.radius * this.crossRadius ||
-      Math.abs(this.x - enemys[i].getX()) < this.radius + enemys[i].getRadius() &&
-      Math.abs(this.y - enemys[i].getY()) < this.radius * this.crossRadius )
+        Math.abs(this.x - enemys[i].getX()) < this.radius * this.crossRadius ||
+        Math.abs(this.x - enemys[i].getX()) < this.radius + enemys[i].getRadius() &&
+        Math.abs(this.y - enemys[i].getY()) < this.radius * this.crossRadius)
       {
         deadEnemies.push(enemys[i]);
       }
@@ -501,9 +510,9 @@ class RingPowerUp extends PowerUp
     for (var i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 9-10, if its inside it will live!
     {
       if (Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
-       (this.x - enemys[i].getX())) < this.radius * this.outerRadius + enemys[i].getRadius() &&
-       Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
-        (this.x - enemys[i].getX())) > this.radius * this.innerRadius - enemys[i].getRadius())
+          (this.x - enemys[i].getX())) < this.radius * this.outerRadius + enemys[i].getRadius() &&
+        Math.sqrt((this.y - enemys[i].getY()) * (this.y - enemys[i].getY()) + (this.x - enemys[i].getX()) *
+          (this.x - enemys[i].getX())) > this.radius * this.innerRadius - enemys[i].getRadius())
       {
         deadEnemies.push(enemys[i]);
       }
@@ -518,7 +527,7 @@ class RingPowerUp extends PowerUp
     ctx.stroke();
     ctx.lineTo(this.x + this.radius * this.innerRadius, this.y);
     ctx.stroke();
-    ctx.arc(this.x, this.y, this.radius * this.innerRadius, 0 , Math.PI * 2, true);
+    ctx.arc(this.x, this.y, this.radius * this.innerRadius, 0, Math.PI * 2, true);
     ctx.stroke();
     ctx.lineTo(this.x + this.radius * this.outerRadius, this.y);
     ctx.stroke();
@@ -540,7 +549,7 @@ class ExpandPowerUp extends PowerUp
     for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer, but grows.
     {
       if ((enemys[i].getRadius() + this.radius * this.startRadius) * (enemys[i].getRadius() + this.radius * this.startRadius) >
-            (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
+        (enemys[i].getX() - this.x) * (enemys[i].getX() - this.x) + (enemys[i].getY() - this.y) * (enemys[i].getY() - this.y))
       {
         deadEnemies.push(enemys[i]);
       }
@@ -558,146 +567,159 @@ class ExpandPowerUp extends PowerUp
   }
 }
 
-canvas.addEventListener("mousemove", function (e) {
-    mX = e.pageX;
-    mY = e.pageY;
+canvas.addEventListener("mousemove", function(e)
+{
+  mX = e.pageX;
+  mY = e.pageY;
 });
 
-function removeEnemy(dead) {
-    enemys.splice(enemys.indexOf(dead), 1);
-    enemysKilled++;
+function removeEnemy(dead)
+{
+  enemys.splice(enemys.indexOf(dead), 1);
+  enemysKilled++;
 }
 
-function removePlayer(dead) {
-    players.splice(players.indexOf(dead), 1);
-    if (players.length <= 0)
-    {
-        console.log("GG");
-        gameOn = false;
-        clearInterval(enemySpawner);
-        clearInterval(powerupSpawner);
-        clearInterval(timeTracker);
-    }
+function removePlayer(dead)
+{
+  players.splice(players.indexOf(dead), 1);
+  if (players.length <= 0)
+  {
+    console.log("GG");
+    gameOn = false;
+    clearInterval(enemySpawner);
+    clearInterval(powerupSpawner);
+    clearInterval(timeTracker);
+  }
 }
 
-function removePowerup(dead) {
-    powerups.splice(powerups.indexOf(dead), 1);
-    console.log("powerup down");
+function removePowerup(dead)
+{
+  powerups.splice(powerups.indexOf(dead), 1);
+  console.log("powerup down");
 }
 
-function world() {
-    var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
-    players[0] = player1;
+function world()
+{
+  var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
+  players[0] = player1;
 
-    enemySpawner = setInterval( function()
+  enemySpawner = setInterval(function()
+  {
+    xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
+    ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
+    spawnRadius = 10;
+    spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+    spawnSpeed = 3;
+    spawnAI = Math.floor(Math.random() * 10);
+    if (spawnAI < 7)
     {
-      xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
-      ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
-      spawnRadius = 10;
-      spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
-      spawnSpeed = 3;
-      spawnAI = Math.floor(Math.random() * 10);
-      if (spawnAI < 7)
-      {
-        enemys[enemys.length] = new RandomEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
-      }
-      else if (spawnAI < 8)
-      {
-        enemys[enemys.length] = new TrapEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
-      }
-      else if ( spawnAI < 9)
-      {
-        enemys[enemys.length] = new MouseEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
-      }
-      else
-      {
-        enemys[enemys.length] = new FollowEnemy(xSpawnCoor,ySpawnCoor,spawnRadius,spawnColor,spawnSpeed);
-      }
-
-    }, 250);
-
-    powerupSpawner = setInterval( function()
+      enemys[enemys.length] = new RandomEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+    }
+    else if (spawnAI < 8)
     {
-      xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
-      yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
-      spawnType = Math.floor(Math.random() * 5);
-      if (spawnType < 1)
-      {
-        powerups[powerups.length] = new CirclePowerUp(xPowerSpawnCoor,yPowerSpawnCoor);
-      }
-      else if (spawnType < 2)
-      {
-        powerups[powerups.length] = new DiamondPowerUp(xPowerSpawnCoor,yPowerSpawnCoor);
-      }
-      else if ( spawnType < 3)
-      {
-        powerups[powerups.length] = new CrossPowerUp(xPowerSpawnCoor,yPowerSpawnCoor);
-      }
-      else if (spawnType < 4)
-      {
-        powerups[powerups.length] = new RingPowerUp(xPowerSpawnCoor,yPowerSpawnCoor);
-      }
-      else
-      {
-        powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor,yPowerSpawnCoor);
-      }
-        //powerups[powerups.length] = new PowerUp(Math.floor(Math.random() * window.width) + 1,Math.floor(Math.random() * window.height) + 1, Math.floor(Math.random() * 5));//Math.floor(Math.random() * 4)
-      console.log("new powerup");
-    }, 500);
-
-    timeTracker = setInterval( function()
+      enemys[enemys.length] = new TrapEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+    }
+    else if (spawnAI < 9)
     {
-        time++;
-    }, 1000);
+      enemys[enemys.length] = new MouseEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+    }
+    else
+    {
+      enemys[enemys.length] = new FollowEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
+    }
+
+  }, 250);
+
+  powerupSpawner = setInterval(function()
+  {
+    xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
+    yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
+    spawnType = Math.floor(Math.random() * 5);
+    if (spawnType < 1)
+    {
+      powerups[powerups.length] = new CirclePowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+    }
+    else if (spawnType < 2)
+    {
+      powerups[powerups.length] = new DiamondPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+    }
+    else if (spawnType < 3)
+    {
+      powerups[powerups.length] = new CrossPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+    }
+    else if (spawnType < 4)
+    {
+      powerups[powerups.length] = new RingPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+    }
+    else
+    {
+      powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
+    }
+    //powerups[powerups.length] = new PowerUp(Math.floor(Math.random() * window.width) + 1,Math.floor(Math.random() * window.height) + 1, Math.floor(Math.random() * 5));//Math.floor(Math.random() * 4)
+    console.log("new powerup");
+  }, 500);
+
+  timeTracker = setInterval(function()
+  {
+    time++;
+  }, 1000);
 }
 
-function render() {
-    ctx.clearRect(0, 0, width, height);
+function startRender()
+{
+  ctx.clearRect(0, 0, width, height);
+}
 
-    for (var i = 0; i < enemys.length; i++ ){
-        enemys[i].update();
-        enemys[i].render();
-    }
+function render()
+{
+  ctx.clearRect(0, 0, width, height);
 
-    for (var i = 0; i < powerups.length; i++ ){
-        powerups[i].update();
-        powerups[i].render();
-    }
+  for (var i = 0; i < enemys.length; i++)
+  {
+    enemys[i].update();
+    enemys[i].render();
+  }
 
-    players[0].update(mX, mY);
-    players[0].render();
+  for (var i = 0; i < powerups.length; i++)
+  {
+    powerups[i].update();
+    powerups[i].render();
+  }
 
-    ctx.font = "30px Arial";
-    ctx.fillText("Score: " + enemysKilled, width - 200 , 100);
-    ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
+  players[0].update(mX, mY);
+  players[0].render();
 
-    while (deadPlayers.length > 0)
+  ctx.font = "30px Arial";
+  ctx.fillText("Score: " + enemysKilled, width - 200, 100);
+  ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
 
-    {
-        removePlayer(deadPlayers.pop());
-        console.log("player down!")
-    }
+  while (deadPlayers.length > 0)
 
-    while (deadEnemies.length > 0)
-    {
-        removeEnemy(deadEnemies.pop());
-        console.log("enemy down!");
-    }
+  {
+    removePlayer(deadPlayers.pop());
+    console.log("player down!")
+  }
 
-    while (deadPowerups.length > 0)
-    {
-        removePowerup(deadPowerups.pop());
-        console.log("powerup down!")
-    }
+  while (deadEnemies.length > 0)
+  {
+    removeEnemy(deadEnemies.pop());
+    console.log("enemy down!");
+  }
 
-    if (gameOn)
-    {
-        requestAnimationFrame(render);
-    }
+  while (deadPowerups.length > 0)
+  {
+    removePowerup(deadPowerups.pop());
+    console.log("powerup down!")
+  }
+
+  if (gameOn)
+  {
+    requestAnimationFrame(render);
+  }
 }
 
 function main()
 {
-    world();
-    render();
+  world();
+  render();
 }
