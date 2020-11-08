@@ -602,6 +602,7 @@ function removePowerup(dead)
 }
 
 var spawnEnemyDelay = 25;
+
 function spawnEnemy()
 {
   if (spawnEnemyDelay < 10)
@@ -707,55 +708,76 @@ function startRender()
 {
   ctx.clearRect(0, 0, width, height);
   ctx.font = "30px Arial";
-  ctx.fillText("Welcome to TiltToTilt ", width - 200, 100);
-  ctx.fillText("Control a ship while avoiding the dots", width - 200, 150);
+  ctx.textAlign = "center";
+  ctx.fillText("Welcome to TiltToTilt ", width/2, 100);
+  ctx.fillText("Control a ship while avoiding the dots", width/2, 150);
+  ctx.fillText("Hit diamond powerups to clear enemies", width/2, 200);
+  ctx.fillText("Press s to start", width/2, 250);
 }
+
+var gamePause = true;
 
 function render()
 {
   ctx.clearRect(0, 0, width, height);
-  onTimer();
-  for (var i = 0; i < enemys.length; i++)
+  if (!gamePause)
   {
-    //enemys[i].update();
-    enemys[i].render();
+    onTimer();
+    for (var i = 0; i < enemys.length; i++)
+    {
+      //enemys[i].update();
+      enemys[i].render();
+    }
+
+    for (var i = 0; i < powerups.length; i++)
+    {
+      //powerups[i].update();
+      powerups[i].render();
+    }
+
+    //players[0].update(mX, mY);
+    players[0].render();
+
+    ctx.font = "30px Arial";
+    ctx.fillText("Score: " + enemysKilled, width - 200, 100);
+    ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
+
+    while (deadPlayers.length > 0)
+    {
+      removePlayer(deadPlayers.pop());
+      console.log("player down!");
+    }
+
+    while (deadEnemies.length > 0)
+    {
+      removeEnemy(deadEnemies.pop());
+      console.log("enemy down!");
+    }
+
+    while (deadPowerups.length > 0)
+    {
+      removePowerup(deadPowerups.pop());
+      console.log("powerup down!");
+    }
   }
-
-  for (var i = 0; i < powerups.length; i++)
+  else
   {
-    //powerups[i].update();
-    powerups[i].render();
-  }
-
-  //players[0].update(mX, mY);
-  players[0].render();
-
-  ctx.font = "30px Arial";
-  ctx.fillText("Score: " + enemysKilled, width - 200, 100);
-  ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
-
-  while (deadPlayers.length > 0)
-
-  {
-    removePlayer(deadPlayers.pop());
-    console.log("player down!")
-  }
-
-  while (deadEnemies.length > 0)
-  {
-    removeEnemy(deadEnemies.pop());
-    console.log("enemy down!");
-  }
-
-  while (deadPowerups.length > 0)
-  {
-    removePowerup(deadPowerups.pop());
-    console.log("powerup down!")
+    startRender();
   }
 
   if (gameOn)
   {
     requestAnimationFrame(render);
+  }
+}
+
+window.addEventListener('keydown', this.check, false);
+
+function check(e)
+{
+  if (e.keyCode == 83)
+  {
+    gamePause = false;
   }
 }
 
