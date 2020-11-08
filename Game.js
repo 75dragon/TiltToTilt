@@ -24,6 +24,7 @@ deadPowerups = [];
 var enemysKilled = 0;
 var time = 0;
 var countInt = 0;
+var msPerFrame = 10;
 
 
 
@@ -44,7 +45,7 @@ class Enemy
   AI() //override this
   {}
 
-  update()
+  onTick()
   {
     // get the target x and y from AI
     this.AI();
@@ -66,6 +67,7 @@ class Enemy
     // Stop once we hit our target. This stops the jittery bouncing of the object.
     // Basically only move when we are not there yet
     // Also change hitDestination to true, so some AI's can use it.
+
     if (dist > this.radius / 2)
     {
       // add our velocities
@@ -195,7 +197,7 @@ class Player
     this.immune = false;
   }
 
-  update(x, y)
+  onTick(x, y)
   {
     // get the target x and y
     this.targetX = x;
@@ -316,7 +318,7 @@ class PowerUp
 
   }
 
-  update()
+  onTick()
   {
     if (this.awake == false && this.active == false)
     { //didn't hit but spawned
@@ -599,8 +601,14 @@ function removePowerup(dead)
   console.log("powerup down");
 }
 
+var spawnEnemyDelay = 25;
 function spawnEnemy()
 {
+  if (spawnEnemyDelay < 10)
+  {
+    spawnEnemyDelay++;
+    return;
+  }
   xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
   ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
   spawnRadius = 10;
@@ -623,10 +631,17 @@ function spawnEnemy()
   {
     enemys[enemys.length] = new FollowEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
   }
+  spawnEnemyDelay = 0;
 }
 
+var spawnPowerUpDelay = 0;
 function spawnPowerUp()
 {
+  if (spawnPowerUpDelay < 25)
+  {
+    spawnPowerUpDelay++;
+    return;
+  }
   xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
   yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
   spawnType = Math.floor(Math.random() * 5);
@@ -650,36 +665,42 @@ function spawnPowerUp()
   {
     powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
   }
+  spawnPowerUpDelay = 0;
+}
+
+var holdTime = 0;
+function worldTime()
+{
+  holdTime++;
+  if (holdTime >= 100)
+  {
+    time++;
+    holdTime = 0;
+  }
 }
 
 function onTimer()
 {
-  spawnEnemy();
-  countInt++;
-  if (countInt == 1  || countInt == 3)
+  for (var i = 0; i < enemys.length; i++)
   {
-    spawnPowerUp();
+    enemys[i].onTick();
   }
-  if (countInt == 3)
-  {
-    time++;
-    countInt = 0;
-  }
-}
 
-function worldTimer()
-{
-  globalTimer = setInterval(function()
+  for (var i = 0; i < powerups.length; i++)
   {
-    onTimer();
-  }, 250);
+    powerups[i].onTick();
+  }
+
+  players[0].onTick(mX, mY);
+  spawnEnemy();
+  spawnPowerUp();
+  worldTime();
 }
 
 function world()
 {
   var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
   players[0] = player1;
-  worldTimer();
 }
 
 function startRender()
@@ -693,20 +714,20 @@ function startRender()
 function render()
 {
   ctx.clearRect(0, 0, width, height);
-
+  onTimer();
   for (var i = 0; i < enemys.length; i++)
   {
-    enemys[i].update();
+    //enemys[i].update();
     enemys[i].render();
   }
 
   for (var i = 0; i < powerups.length; i++)
   {
-    powerups[i].update();
+    //powerups[i].update();
     powerups[i].render();
   }
 
-  players[0].update(mX, mY);
+  //players[0].update(mX, mY);
   players[0].render();
 
   ctx.font = "30px Arial";
