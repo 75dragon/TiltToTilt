@@ -1,32 +1,29 @@
-var canvas = document.getElementById("canvas"),
-  ctx = canvas.getContext("2d"),
-  width = window.innerWidth,
-  height = window.innerHeight,
-  mX = width / 2,
-  mY = height / 2;
-
-//canvas.style.width = window.innerWidth;
-//canvas.style.height = window.innerHeight;
-
+canvas = document.getElementById("canvas");
+ctx = canvas.getContext("2d");
+width = window.innerWidth;
+height = window.innerHeight;
+mX = width / 2;
+mY = height / 2;
 canvas.width = width;
 canvas.height = height;
 
 players = [];
 enemys = [];
 powerups = [];
-var enemySpawner;
-var powerupSpawner;
-var timeTracker;
-var gameOn = true;
 deadPlayers = [];
 deadEnemies = [];
 deadPowerups = [];
-var enemysKilled = 0;
-var time = 0;
-var countInt = 0;
-var msPerFrame = 10;
+enemysKilled = 0;
+time = 0;
 
+spawnEnemyDelay = 0;
+spawnPowerUpDelay = 0;
+holdTime = 0;
 
+gameStart = true;
+gamePaused = true;
+gameRunning = true; //always true
+gameEnd = false;
 
 class Enemy
 {
@@ -144,7 +141,7 @@ class TrapEnemy extends Enemy
 
   AI()
   {
-    if (this.hitDestination)
+    if (this.hitDestination && players.length > 0)
     {
       this.targetX = players[0].getX() + Math.floor(Math.random() * 500) - 250;
       this.targetY = players[0].getY() + Math.floor(Math.random() * 500) - 250;
@@ -162,8 +159,11 @@ class FollowEnemy extends Enemy
 
   AI()
   {
-    this.targetX = players[0].getX();
-    this.targetY = players[0].getY();
+    if (players.length > 0)
+    {
+      this.targetX = players[0].getX();
+      this.targetY = players[0].getY();
+    }
   }
 }
 
@@ -176,8 +176,11 @@ class MouseEnemy extends Enemy
 
   AI()
   {
-    this.targetX = players[0].getMouseX();
-    this.targetY = players[0].getMouseY();
+    if (players.length > 0)
+    {
+      this.targetX = players[0].getMouseX();
+      this.targetY = players[0].getMouseY();
+    }
   }
 }
 
@@ -588,10 +591,8 @@ function removePlayer(dead)
   if (players.length <= 0)
   {
     console.log("GG");
-    gameOn = false;
-    clearInterval(enemySpawner);
-    clearInterval(powerupSpawner);
-    clearInterval(timeTracker);
+    gameOver();
+    //gameRunning = false; //TODO
   }
 }
 
@@ -600,8 +601,6 @@ function removePowerup(dead)
   powerups.splice(powerups.indexOf(dead), 1);
   console.log("powerup down");
 }
-
-var spawnEnemyDelay = 25;
 
 function spawnEnemy()
 {
@@ -635,7 +634,6 @@ function spawnEnemy()
   spawnEnemyDelay = 0;
 }
 
-var spawnPowerUpDelay = 0;
 function spawnPowerUp()
 {
   if (spawnPowerUpDelay < 25)
@@ -669,7 +667,6 @@ function spawnPowerUp()
   spawnPowerUpDelay = 0;
 }
 
-var holdTime = 0;
 function worldTime()
 {
   holdTime++;
@@ -691,8 +688,10 @@ function onTimer()
   {
     powerups[i].onTick();
   }
-
-  players[0].onTick(mX, mY);
+  for (var i = 0; i < players.length; i++)
+  {
+    players[i].onTick(mX, mY);
+  }
   spawnEnemy();
   spawnPowerUp();
   worldTime();
@@ -715,28 +714,65 @@ function startRender()
   ctx.fillText("Press s to start", width/2, 250);
 }
 
-var gamePause = true;
+function endRender()
+{
+  ctx.clearRect(0, 0, width, height);
+  ctx.font = "30px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Gave Over!", width/2, 100);
+  ctx.fillText("Press R to restart", width/2, 150);
+}
+
+function gameOver()
+{
+  gameStart = false;
+  gamePaused = true;
+  gameRunning = true; //always true
+  gameEnd = true;
+}
+
+function resetGame()
+{
+  players = [];
+  enemys = [];
+  powerups = [];
+  deadPlayers = [];
+  deadEnemies = [];
+  deadPowerups = [];
+  enemysKilled = 0;
+  time = 0;
+
+  spawnEnemyDelay = 0;
+  spawnPowerUpDelay = 0;
+  holdTime = 0;
+
+  gameStart = false;
+  gamePaused = false;
+  gameRunning = true; //always true
+  gameEnd = true;
+}
 
 function render()
 {
   ctx.clearRect(0, 0, width, height);
-  if (!gamePause)
+  if (!gamePaused)
   {
     onTimer();
     for (var i = 0; i < enemys.length; i++)
     {
-      //enemys[i].update();
       enemys[i].render();
     }
 
     for (var i = 0; i < powerups.length; i++)
     {
-      //powerups[i].update();
       powerups[i].render();
     }
 
-    //players[0].update(mX, mY);
-    players[0].render();
+    for (var i = 0; i < players.length; i++)
+    {
+      players[i].render();
+    }
+
 
     ctx.font = "30px Arial";
     ctx.fillText("Score: " + enemysKilled, width - 200, 100);
@@ -760,12 +796,16 @@ function render()
       console.log("powerup down!");
     }
   }
-  else
+  else if (gameEnd)
+  {
+    endRender();
+  }
+  else if (gameStart)
   {
     startRender();
   }
 
-  if (gameOn)
+  if (gameRunning)
   {
     requestAnimationFrame(render);
   }
@@ -775,10 +815,16 @@ window.addEventListener('keydown', this.check, false);
 
 function check(e)
 {
-  if (e.keyCode == 83)
+  if (e.keyCode == 83) // s to start game
   {
-    gamePause = false;
+    gamePaused = false;
+    gameEnd = false;
+    gameStart = false;
+    gameRunning = true;
+    //requestAnimationFrame();
   }
+
+
 }
 
 function main()
