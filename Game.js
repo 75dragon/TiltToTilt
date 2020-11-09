@@ -20,9 +20,9 @@ spawnEnemyDelay = 0;
 spawnPowerUpDelay = 0;
 holdTime = 0;
 
-gameStart = true;
-gamePaused = true;
-gameRunning = true; //always true
+gameStart = false;
+gamePaused = false;
+gameRunning = false; //always true
 gameEnd = false;
 
 class Enemy
@@ -697,12 +697,6 @@ function onTimer()
   worldTime();
 }
 
-function world()
-{
-  var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
-  players[0] = player1;
-}
-
 function startRender()
 {
   ctx.clearRect(0, 0, width, height);
@@ -727,8 +721,9 @@ function gameOver()
 {
   gameStart = false;
   gamePaused = true;
-  gameRunning = true; //always true
+  gameRunning = false; //always true
   gameEnd = true;
+  render();
 }
 
 function resetGame()
@@ -815,20 +810,39 @@ window.addEventListener('keydown', this.check, false);
 
 function check(e)
 {
-  if (e.keyCode == 83) // s to start game
+  if (e.keyCode == 83 && gameStart == true) // s to start game
   {
     gamePaused = false;
     gameEnd = false;
     gameStart = false;
     gameRunning = true;
-    //requestAnimationFrame();
+    render();
   }
+  else if ( e.keyCode == 82  && gameEnd == true) // r
+  {
+    gamePaused = false;
+    gameEnd = false;
+    gameStart = false;
+    gameRunning = false;
+    resetGame();
+    var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
+    players[0] = player1;
+    render();
+  }
+}
 
-
+function world()
+{
+  var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
+  players[0] = player1;
 }
 
 function main()
 {
   world();
+  gamePaused = true;
+  gameEnd = false;
+  gameStart = true;
+  gameRunning = false;
   render();
 }
