@@ -714,7 +714,8 @@ function endRender()
   ctx.font = "30px Arial";
   ctx.textAlign = "center";
   ctx.fillText("Gave Over!", width/2, 100);
-  ctx.fillText("Press R to restart", width/2, 150);
+  ctx.fillText("Score: " + enemysKilled, width/2, 150);
+  ctx.fillText("Press R to restart", width/2, 200);
 }
 
 function gameOver()
