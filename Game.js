@@ -14,15 +14,16 @@ deadPlayers = [];
 deadEnemies = [];
 deadPowerups = [];
 enemysKilled = 0;
-time = 0;
+lastUpdate = 0;
+nowUpdate = 0;
+gameStartTime = 0;
 
 spawnEnemyDelay = 0;
 spawnPowerUpDelay = 0;
-holdTime = 0;
 
 gameStart = false;
 gamePaused = false;
-gameRunning = false; //always true
+gameRunning = false;
 gameEnd = false;
 
 class Enemy
@@ -32,7 +33,7 @@ class Enemy
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 10;
-    this.speed = speed || 3;
+    this.speed = speed || .2;
     this.color = color || "rgb(0,0,255)";
     this.velX = 0;
     this.velY = 0;
@@ -42,7 +43,7 @@ class Enemy
   AI() //override this
   {}
 
-  onTick()
+  onTick(deltaTime)
   {
     // get the target x and y from AI
     this.AI();
@@ -58,8 +59,8 @@ class Enemy
      * this gives us a constant movement speed.
      */
 
-    this.velX = (tx / dist) * this.speed;
-    this.velY = (ty / dist) * this.speed;
+    this.velX = (tx / dist) * this.speed * deltaTime;
+    this.velY = (ty / dist) * this.speed * deltaTime;
 
     // Stop once we hit our target. This stops the jittery bouncing of the object.
     // Basically only move when we are not there yet
@@ -191,7 +192,7 @@ class Player
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 10;
-    this.speed = 5;
+    this.speed = .3;
     this.color = color || "rgb(255,0,0)";
     this.hp = hp || 10;
     this.velX = 0;
@@ -200,11 +201,11 @@ class Player
     this.immune = false;
   }
 
-  onTick(x, y)
+  onTick(deltaTime)
   {
     // get the target x and y
-    this.targetX = x;
-    this.targetY = y;
+    this.targetX = mX;
+    this.targetY = mY;
 
     // We need to get the distance this time around
     var tx = this.targetX - this.x,
@@ -217,8 +218,8 @@ class Player
      * this gives us a constant movement speed.
      */
 
-    this.velX = (tx / dist) * this.speed;
-    this.velY = (ty / dist) * this.speed;
+     this.velX = (tx / dist) * this.speed * deltaTime;
+     this.velY = (ty / dist) * this.speed * deltaTime;
 
     // Stop once we hit our target. This stops the jittery bouncing of the object.
     if (dist > this.radius / 2)
@@ -314,14 +315,15 @@ class PowerUp
     this.color = "rgb(0,0,0)";
     this.awake = false;
     this.active = false;
+    this.duration = 1000;
   }
 
-  activeEffect()
+  activeEffect(deltaTime)
   {
 
   }
 
-  onTick()
+  onTick(deltaTime)
   {
     if (this.awake == false && this.active == false)
     { //didn't hit but spawned
@@ -336,18 +338,18 @@ class PowerUp
       }
     }
     else if (this.awake == true && this.active == false)
-    { //second u hit
+    {
       this.active = true;
-      var that = this;
-      setTimeout(function()
-      {
-        console.log("time is up!");
-        deadPowerups.push(that);
-      }, 1000, this);
     }
     else if (this.awake == true && this.active == true)
     {
-      this.activeEffect()
+      this.activeEffect(deltaTime)
+      this.duration -= deltaTime;
+      if (this.duration < 0)
+      {
+        console.log(this.duration);
+        deadPowerups.push(this);
+      }
     }
   }
 
@@ -373,7 +375,7 @@ class PowerUp
 
   }
 
-  render()
+  render(deltaTime)
   {
     if (!this.active)
     {
@@ -381,7 +383,7 @@ class PowerUp
     }
     else
     {
-      this.activeRender()
+      this.activeRender(deltaTime)
     }
   }
 
@@ -413,7 +415,7 @@ class CirclePowerUp extends PowerUp
     super(x, y)
     this.circleRadius = 8;
   }
-  activeEffect()
+  activeEffect(deltaTime)
   {
     for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 8 * radius or closer.
     {
@@ -425,7 +427,7 @@ class CirclePowerUp extends PowerUp
     }
   }
 
-  activeRender()
+  activeRender(deltaTime)
   {
     ctx.fillStyle = this.color;
     ctx.beginPath();
@@ -442,7 +444,7 @@ class DiamondPowerUp extends PowerUp
     super(x, y)
     this.diamondRadius = 8;
   }
-  activeEffect()
+  activeEffect(deltaTime)
   {
     for (var i = 0; i < enemys.length; i++) //check if the enemys hits the diamond, size 8
     {
@@ -456,7 +458,7 @@ class DiamondPowerUp extends PowerUp
     }
   }
 
-  activeRender()
+  activeRender(delteTime)
   {
     ctx.fillStyle = this.color;
     ctx.beginPath()
@@ -481,7 +483,7 @@ class CrossPowerUp extends PowerUp
     super(x, y)
     this.crossRadius = 15;
   }
-  activeEffect()
+  activeEffect(deltaTime)
   {
     for (var i = 0; i < enemys.length; i++) //check if an enemy is vertical or horizontal, basically a + with width/height of radius * 15. Nerf!
     {
@@ -495,7 +497,7 @@ class CrossPowerUp extends PowerUp
     }
   }
 
-  activeRender()
+  activeRender(deltaTime)
   {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x - this.radius, this.y - this.radius * this.crossRadius, this.radius * 2, this.radius * this.crossRadius * 2);
@@ -511,7 +513,7 @@ class RingPowerUp extends PowerUp
     this.innerRadius = 9;
     this.outerRadius = 10;
   }
-  activeEffect()
+  activeEffect(deltaTime)
   {
     for (var i = 0; i < enemys.length; i++) //check if the enemys hits the ring of 9-10, if its inside it will live!
     {
@@ -525,7 +527,7 @@ class RingPowerUp extends PowerUp
     }
   }
 
-  activeRender()
+  activeRender(deltaTime)
   {
     ctx.fillStyle = this.color;
     ctx.beginPath();
@@ -548,9 +550,9 @@ class ExpandPowerUp extends PowerUp
   {
     super(x, y)
     this.startRadius = 5;
-    this.expandRatio = .2;
+    this.expandRatio = .015;
   }
-  activeEffect()
+  activeEffect(deltaTime)
   {
     for (var i = 0; i < enemys.length; i++) //check if an enemy is a distance of 5 * radius or closer, but grows.
     {
@@ -562,14 +564,14 @@ class ExpandPowerUp extends PowerUp
     }
   }
 
-  activeRender()
+  activeRender(deltaTime)
   {
     ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius * this.startRadius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.fill();
-    this.radius += this.expandRatio;
+    this.radius += this.expandRatio * deltaTime;
   }
 }
 
@@ -592,7 +594,6 @@ function removePlayer(dead)
   {
     console.log("GG");
     gameOver();
-    //gameRunning = false; //TODO
   }
 }
 
@@ -604,16 +605,11 @@ function removePowerup(dead)
 
 function spawnEnemy()
 {
-  if (spawnEnemyDelay < 10)
-  {
-    spawnEnemyDelay++;
-    return;
-  }
   xSpawnCoor = Math.floor(Math.random() * 2) * window.width;
   ySpawnCoor = Math.floor(Math.random() * 2) * window.height;
   spawnRadius = 10;
   spawnColor = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
-  spawnSpeed = 3;
+  spawnSpeed = .2;
   spawnAI = Math.floor(Math.random() * 10);
   if (spawnAI < 7)
   {
@@ -631,16 +627,10 @@ function spawnEnemy()
   {
     enemys[enemys.length] = new FollowEnemy(xSpawnCoor, ySpawnCoor, spawnRadius, spawnColor, spawnSpeed);
   }
-  spawnEnemyDelay = 0;
 }
 
 function spawnPowerUp()
 {
-  if (spawnPowerUpDelay < 25)
-  {
-    spawnPowerUpDelay++;
-    return;
-  }
   xPowerSpawnCoor = Math.floor(Math.random() * window.width) + 1;
   yPowerSpawnCoor = Math.floor(Math.random() * window.height) + 1;
   spawnType = Math.floor(Math.random() * 5);
@@ -664,37 +654,52 @@ function spawnPowerUp()
   {
     powerups[powerups.length] = new ExpandPowerUp(xPowerSpawnCoor, yPowerSpawnCoor);
   }
-  spawnPowerUpDelay = 0;
 }
 
-function worldTime()
-{
-  holdTime++;
-  if (holdTime >= 100)
-  {
-    time++;
-    holdTime = 0;
-  }
-}
+enemiesSpawned = 0;
+enemySpawnDelay = 250;
+enemySpawnDelta = 0;
+powerupsSpawned = 0;
+powerupsSpawnDelay = 250;
+powerupsSpawnDelta = 0;
 
-function onTimer()
+function onTimer(delta)
 {
   for (var i = 0; i < enemys.length; i++)
   {
-    enemys[i].onTick();
+    enemys[i].onTick(delta);
   }
 
   for (var i = 0; i < powerups.length; i++)
   {
-    powerups[i].onTick();
+    powerups[i].onTick(delta);
   }
   for (var i = 0; i < players.length; i++)
   {
-    players[i].onTick(mX, mY);
+    players[i].onTick(delta);
   }
-  spawnEnemy();
-  spawnPowerUp();
-  worldTime();
+  enemySpawnDelta += delta;
+  if (enemySpawnDelta > enemySpawnDelay)
+  {
+    spawnEnemy();
+    enemiesSpawned += 1;
+    enemySpawnDelta -= enemySpawnDelay;
+  }
+  if (enemiesSpawned > 100)
+  {
+    enemySpawnDelay = 100;
+  }
+  if (enemiesSpawned > 200)
+  {
+    enemySpawnDelay = 25;
+  }
+  powerupsSpawnDelta += delta;
+  if (powerupsSpawnDelta > powerupsSpawnDelay)
+  {
+    spawnPowerUp();
+    powerupsSpawned += 1;
+    powerupsSpawnDelta -= powerupsSpawnDelay;
+  }
 }
 
 function startRender()
@@ -736,24 +741,30 @@ function resetGame()
   deadEnemies = [];
   deadPowerups = [];
   enemysKilled = 0;
-  time = 0;
-
-  spawnEnemyDelay = 0;
-  spawnPowerUpDelay = 0;
-  holdTime = 0;
 
   gameStart = false;
   gamePaused = false;
   gameRunning = true; //always true
   gameEnd = true;
+
+  enemiesSpawned = 0;
+  enemySpawnDelay = 250;
+  enemySpawnDelta = 0;
+  powerupsSpawned = 0;
+  powerupsSpawnDelay = 250;
+  powerupsSpawnDelta = 0;
 }
 
 function render()
 {
   ctx.clearRect(0, 0, width, height);
+  var d = new Date();
+  nowUpdate = d.getTime();
+  deltaUpdate = nowUpdate - lastUpdate;
+  lastUpdate = nowUpdate;
   if (!gamePaused)
   {
-    onTimer();
+    onTimer(deltaUpdate);
     for (var i = 0; i < enemys.length; i++)
     {
       enemys[i].render();
@@ -761,7 +772,7 @@ function render()
 
     for (var i = 0; i < powerups.length; i++)
     {
-      powerups[i].render();
+      powerups[i].render(deltaUpdate);
     }
 
     for (var i = 0; i < players.length; i++)
@@ -772,7 +783,11 @@ function render()
 
     ctx.font = "30px Arial";
     ctx.fillText("Score: " + enemysKilled, width - 200, 100);
-    ctx.fillText("Time: " + Math.floor(time / 60) + ":" + ("0" + Math.floor(time % 60)).slice(-2), width - 200, 150);
+
+    rd = new Date();
+    rn = rd.getTime();
+
+    ctx.fillText("Time: " + Math.floor((this.rn - gameStartTime) / (1000 * 60)) + ":" + ("0" + Math.floor(((this.rn - gameStartTime) / (1000)) % 60)).slice(-2), width - 200, 150);
 
     while (deadPlayers.length > 0)
     {
@@ -817,6 +832,9 @@ function check(e)
     gameEnd = false;
     gameStart = false;
     gameRunning = true;
+    var d = new Date();
+    lastUpdate = d.getTime();
+    gameStartTime = d.getTime();
     render();
   }
   else if ( e.keyCode == 82  && gameEnd == true) // r
@@ -828,6 +846,9 @@ function check(e)
     resetGame();
     var player1 = new Player(width / 2, height / 2, 10, "rgb(0,0,0)", 1);
     players[0] = player1;
+    var d = new Date();
+    lastUpdate = d.getTime();
+    gameStartTime = d.getTime();
     render();
   }
 }
